@@ -26,8 +26,10 @@ public class Tree<T> {
         public void addChild(Node<T> parent, T d) {
             Node<T> n = new Node<>();
             n.data = d;
-            n.children = new ArrayList<Node<T>>();
+            n.children = new ArrayList<>();
             n.parent = parent;
+            
+            parent.children.add(n);
         }
 
         public T getData() {
@@ -41,7 +43,6 @@ public class Tree<T> {
         public List<Node<T>> getChildren() {
             return children;
         }
-        
-        
+
     }
 }
