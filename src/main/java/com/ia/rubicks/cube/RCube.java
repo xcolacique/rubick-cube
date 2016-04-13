@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 
 public abstract class RCube {
@@ -187,17 +189,14 @@ public abstract class RCube {
 
         Node<HashMap<Integer, String>> rootCube = treeOfCubes.getRoot();
 
-        generateChildrens(rootCube);
+        Queue q = new ConcurrentLinkedQueue<>();
+        q.add(rootCube);
 
-        //Para cada filho gerado para o nó raiz, vê se chegou no resultado
-        //caso não tenha resultado, faz o mesmo para cada filho
-        List<Node<HashMap<Integer, String>>> childrens = rootCube.getChildren();
-        
-        for (Node<HashMap<Integer,String>> children : childrens){
+        while (!q.isEmpty()) {
+            Node<HashMap<Integer, String>> n = (Node<HashMap<Integer, String>>) q.poll();
+            n.isVisited = true;
 
-            System.out.println(printData(children.getData()));
-            
-            if (isDone(children.getData())) {
+            if (isDone(n.getData())) {
                 System.out.println("Done! Printing movements needed to result the initial setup: ");
                 Collections.reverse(movement_historic);
 
@@ -207,61 +206,46 @@ public abstract class RCube {
                 }
 
                 System.out.println(finalMovs);
+                return;
             }
-            else {
-                doSearch(children);
-            }
-        }
 
-    }
-    
-    private static void doSearch(Node<HashMap<Integer, String>> node){
-        generateChildrens(node);
+            generateChildrens(n);
 
-        //Para cada filho gerado para o nó raiz, vê se chegou no resultado
-        //caso não tenha resultado, faz o mesmo para cada filho
-        List<Node<HashMap<Integer, String>>> childrens = node.getChildren();
-        
-        for (Node<HashMap<Integer,String>> children : childrens){
-            
-            System.out.println(printData(children.getData()));
-            
-            if (isDone(children.getData())) {
-                System.out.println("Done! Printing movements needed to result the initial setup: ");
-                Collections.reverse(movement_historic);
+            List<Node<HashMap<Integer, String>>> childrens = n.getChildren();
 
-                String finalMovs = "";
-                for (int i = 0; i < movement_historic.size(); i++) {
-                    finalMovs = movement_historic.get(i) + " ";
+            for (Node<HashMap<Integer, String>> children : childrens) {
+
+                System.out.println(printData(children.getData()));
+                
+                if (children.isVisited == false) {
+                    q.add(children);
                 }
+            }
 
-                System.out.println(finalMovs);
-            }
-            else {
-                doSearch(children);
-            }
         }
+
     }
 
-    private static String printData(HashMap<Integer,String> data){
+    private static String printData(HashMap<Integer, String> data) {
         String s = "";
-        for (int i = 0; i < data.size(); i++){
+        for (int i = 0; i < data.size(); i++) {
             s += data.get(i);
         }
         return s;
     }
+
     private static void generateChildrens(Tree.Node<HashMap<Integer, String>> cube) {
         cube.addChild(cube, moveW(cube.getData(), true));
         cube.addChild(cube, moveW(cube.getData(), false));
         cube.addChild(cube, moveR(cube.getData(), true));
-        cube.addChild(cube, moveR(cube.getData(),false));
-        cube.addChild(cube, moveG(cube.getData(),true));
-        cube.addChild(cube, moveG(cube.getData(),false));
+        cube.addChild(cube, moveR(cube.getData(), false));
+        cube.addChild(cube, moveG(cube.getData(), true));
+        cube.addChild(cube, moveG(cube.getData(), false));
         cube.addChild(cube, moveY(cube.getData(), true));
-        cube.addChild(cube, moveY(cube.getData(),false));
-        cube.addChild(cube, moveO(cube.getData(),true));
-        cube.addChild(cube, moveO(cube.getData(),false));
-        cube.addChild(cube, moveB(cube.getData(),true));
+        cube.addChild(cube, moveY(cube.getData(), false));
+        cube.addChild(cube, moveO(cube.getData(), true));
+        cube.addChild(cube, moveO(cube.getData(), false));
+        cube.addChild(cube, moveB(cube.getData(), true));
         cube.addChild(cube, moveB(cube.getData(), false));
     }
 
@@ -296,8 +280,8 @@ public abstract class RCube {
         return (number_of_white_faces == 8);
     }
 
-    private static HashMap<Integer, String> moveW(HashMap<Integer,String> curentCube, boolean isClockwise) {
-        HashMap<Integer, String> cube = (HashMap<Integer,String>)curentCube.clone();
+    private static HashMap<Integer, String> moveW(HashMap<Integer, String> curentCube, boolean isClockwise) {
+        HashMap<Integer, String> cube = (HashMap<Integer, String>) curentCube.clone();
 
         String p12 = cube.get(11);
         String p13 = cube.get(12);
@@ -372,8 +356,8 @@ public abstract class RCube {
         return cube;
     }
 
-    private static HashMap<Integer, String> moveR(HashMap<Integer,String> curentCube, boolean isClockwise) {
-        HashMap<Integer, String> cube = (HashMap<Integer,String>)curentCube;
+    private static HashMap<Integer, String> moveR(HashMap<Integer, String> curentCube, boolean isClockwise) {
+        HashMap<Integer, String> cube = (HashMap<Integer, String>) curentCube;
 
         String p1 = cube.get(0);
         String p2 = cube.get(1);
@@ -449,8 +433,8 @@ public abstract class RCube {
         return cube;
     }
 
-    private static HashMap<Integer, String> moveY(HashMap<Integer,String> curentCube, boolean isClockwise) {
-        HashMap<Integer, String> cube = (HashMap<Integer,String>)curentCube;
+    private static HashMap<Integer, String> moveY(HashMap<Integer, String> curentCube, boolean isClockwise) {
+        HashMap<Integer, String> cube = (HashMap<Integer, String>) curentCube;
 
         String p18 = cube.get(17);
         String p19 = cube.get(18);
@@ -525,8 +509,8 @@ public abstract class RCube {
         return cube;
     }
 
-    private static HashMap<Integer, String> moveO(HashMap<Integer,String> curentCube, boolean isClockwise) {
-        HashMap<Integer, String> cube = (HashMap<Integer,String>)curentCube;
+    private static HashMap<Integer, String> moveO(HashMap<Integer, String> curentCube, boolean isClockwise) {
+        HashMap<Integer, String> cube = (HashMap<Integer, String>) curentCube;
 
         String p41 = cube.get(40);
         String p42 = cube.get(41);
@@ -601,8 +585,8 @@ public abstract class RCube {
         return cube;
     }
 
-    private static HashMap<Integer, String> moveB(HashMap<Integer,String> curentCube, boolean isClockwise) {
-        HashMap<Integer, String> cube = (HashMap<Integer,String>)curentCube;
+    private static HashMap<Integer, String> moveB(HashMap<Integer, String> curentCube, boolean isClockwise) {
+        HashMap<Integer, String> cube = (HashMap<Integer, String>) curentCube;
 
         String p9 = cube.get(8);
         String p10 = cube.get(9);
@@ -677,8 +661,8 @@ public abstract class RCube {
         return cube;
     }
 
-    private static HashMap<Integer, String> moveG(HashMap<Integer,String> curentCube, boolean isClockwise) {
-        HashMap<Integer, String> cube = (HashMap<Integer,String>)curentCube;
+    private static HashMap<Integer, String> moveG(HashMap<Integer, String> curentCube, boolean isClockwise) {
+        HashMap<Integer, String> cube = (HashMap<Integer, String>) curentCube;
 
         String p15 = cube.get(14);
         String p16 = cube.get(15);

@@ -23,6 +23,8 @@ public class Tree<T> {
         private Node<T> parent;
         private List<Node<T>> children;
 
+        public boolean isVisited = false;
+        
         public void addChild(Node<T> parent, T d) {
             Node<T> n = new Node<>();
             n.data = d;
